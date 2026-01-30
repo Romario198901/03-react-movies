@@ -12,7 +12,7 @@ import MovieModal from '../MovieModal/MovieModal';
 function App() {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [query, setQuery] = useState('');
-  const [isLoading, setisloading] = useState(false);
+  const [isLoading, setIsloading] = useState(false);
   const [isError, setIsError] = useState(false);
   const [isMovieModalOpen, setIsMovieModalOpen] = useState(false);
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
@@ -32,7 +32,7 @@ function App() {
     const getMovies = async () => {
       try {
         setIsError(false);
-        setisloading(true);
+        setIsloading(true);
         const data = await fetchMovies(query);
         if (data.results.length === 0) {
           toast.error('No movies found for your request.');
@@ -44,14 +44,13 @@ function App() {
         toast.error('Something went wrong. Please try again.');
         console.log(error);
       } finally {
-        setisloading(false);
+        setIsloading(false);
       }
     };
     getMovies();
   }, [query]);
-  const handleSearch = (formData: FormData) => {
-    const searchTerm = formData.get('query') as string;
-    setQuery(searchTerm);
+  const handleSearch = (query: string) => {
+    setQuery(query);
     setMovies([]);
   };
   return (
