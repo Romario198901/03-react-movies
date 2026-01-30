@@ -7,12 +7,24 @@ import toast, { Toaster } from 'react-hot-toast';
 import MovieGrid from '../MovieGrid/MovieGrid';
 import Loader from '../Loader/Loader';
 import ErrorMessage from '../ErrorMessage/ErrorMessage';
+import MovieModal from '../MovieModal/MovieModal';
 
 function App() {
   const [movies, setMovies] = useState<Movie[]>([]);
-  const [query, setQuery] = useState('')
+  const [query, setQuery] = useState('');
   const [isLoading, setisloading] = useState(false);
   const [isError, setIsError] = useState(false);
+  const [isMovieModalOpen, setIsMovieModalOpen] = useState(false);
+  const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
+
+  const openModal = (movie: Movie) => {
+    setSelectedMovie(movie);
+    setIsMovieModalOpen(true);
+  };
+  const closeModal = () => {
+    setIsMovieModalOpen(false);
+    setSelectedMovie(null);
+  };
   useEffect(() => {
     if (!query) {
       return;
@@ -31,9 +43,8 @@ function App() {
         setIsError(true);
         toast.error('Something went wrong. Please try again.');
         console.log(error);
-      }
-      finally {
-        setisloading(false)
+      } finally {
+        setisloading(false);
       }
     };
     getMovies();
@@ -41,15 +52,20 @@ function App() {
   const handleSearch = (formData: FormData) => {
     const searchTerm = formData.get('query') as string;
     setQuery(searchTerm);
-     setMovies([]);
+    setMovies([]);
   };
   return (
     <>
-      { <Toaster position="top-right" reverseOrder={false} />}
+      {<Toaster position="top-right" reverseOrder={false} />}
       <SearchBar onSubmit={handleSearch} />
-      {isLoading&& <Loader/>}
-      {isError&& <ErrorMessage/>}
-      {movies.length > 0 && !isError && !isLoading && <MovieGrid onSelect={((movie) => console.log('Selected movie:', movie))} movies= {movies}/>}
+      {isLoading && <Loader />}
+      {isError && <ErrorMessage />}
+      {movies.length > 0 && !isError && !isLoading && (
+        <MovieGrid onSelect={openModal} movies={movies} />
+      )}
+      {isMovieModalOpen && selectedMovie && (
+        <MovieModal movie={selectedMovie} onClose={closeModal} />
+      )}
     </>
   );
 }
