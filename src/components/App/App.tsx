@@ -5,16 +5,22 @@ import { useEffect, useState } from 'react';
 import type { Movie } from '../../types/movie';
 import toast, { Toaster } from 'react-hot-toast';
 import MovieGrid from '../MovieGrid/MovieGrid';
+import Loader from '../Loader/Loader';
+import ErrorMessage from '../ErrorMessage/ErrorMessage';
 
 function App() {
   const [movies, setMovies] = useState<Movie[]>([]);
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState('')
+  const [isLoading, setisloading] = useState(false);
+  const [isError, setIsError] = useState(false);
   useEffect(() => {
     if (!query) {
       return;
     }
     const getMovies = async () => {
       try {
+        setIsError(false);
+        setisloading(true);
         const data = await fetchMovies(query);
         if (data.results.length === 0) {
           toast.error('No movies found for your request.');
@@ -22,8 +28,12 @@ function App() {
         }
         setMovies(data.results);
       } catch (error) {
+        setIsError(true);
         toast.error('Something went wrong. Please try again.');
         console.log(error);
+      }
+      finally {
+        setisloading(false)
       }
     };
     getMovies();
@@ -37,7 +47,9 @@ function App() {
     <>
       { <Toaster position="top-right" reverseOrder={false} />}
       <SearchBar onSubmit={handleSearch} />
-      {movies.length > 0 && <MovieGrid onSelect={((movie) => console.log('Selected movie:', movie))} movies= {movies}/>}
+      {isLoading&& <Loader/>}
+      {isError&& <ErrorMessage/>}
+      {movies.length > 0 && !isError && !isLoading && <MovieGrid onSelect={((movie) => console.log('Selected movie:', movie))} movies= {movies}/>}
     </>
   );
 }
